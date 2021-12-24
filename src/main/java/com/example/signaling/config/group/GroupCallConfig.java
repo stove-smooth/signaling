@@ -1,6 +1,7 @@
 package com.example.signaling.config.group;
 
 import org.kurento.client.KurentoClient;
+import org.kurento.client.Properties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

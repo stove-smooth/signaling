@@ -33,7 +33,8 @@ public class UserSession implements Closeable {
         this.name = name;
         this.session = session;
         this.roomName = roomName;
-        this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).build();
+        // data channel 사용
+        this.outgoingMedia = new WebRtcEndpoint.Builder(pipeline).useDataChannels().build();
 
         this.outgoingMedia.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
@@ -52,6 +53,9 @@ public class UserSession implements Closeable {
                 }
             }
         });
+
+        log.info("pipeline : {}", pipeline);
+        log.info("WebRTCEndPoint : {}", outgoingMedia);
     }
 
     public WebRtcEndpoint getOutgoingWebRtcPeer() {
@@ -103,7 +107,7 @@ public class UserSession implements Closeable {
         WebRtcEndpoint incoming = incomingMedia.get(sender.getName());
         if (incoming == null) {
             log.debug("PARTICIPANT {}: creating new endpoint for {}", this.name, sender.getName());
-            incoming = new WebRtcEndpoint.Builder(pipeline).build();
+            incoming = new WebRtcEndpoint.Builder(pipeline).useDataChannels().build();
 
             incoming.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 

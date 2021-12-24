@@ -1,4 +1,4 @@
-const conn = new WebSocket('ws://localhost:8080/group');
+const conn = new WebSocket("ws://13.209.34.30:8080/group");
 
 conn.onopen = async function() {
     console.log("Connected to the signaling server");
@@ -47,6 +47,7 @@ async function initialize() {
     playVideoFromCamera(constraints);
 
     peerConnection = new RTCPeerConnection(configuration);
+    console.log(peerConnection);
 
     // Setup ice handling
     peerConnection.onicecandidate = function(event) {
@@ -62,6 +63,7 @@ async function initialize() {
     dataChannel = peerConnection.createDataChannel("dataChannel", {
         reliable : true
     });
+    console.log(dataChannel);
 
     dataChannel.onerror = function(error) {
         console.log("Error occured on datachannel:", error);
@@ -132,9 +134,12 @@ const setMediaDevices = async (constraints) => {
 }
 
 // 재생
-async function playVideoFromCamera(constraints) {
+async function playVideoFromCamera() {
     try {
-        const stream = await setMediaDevices(constraints);
+        const stream = await setMediaDevices({
+            video: true,
+            audio: true
+        });
         const video = document.createElement('video');
         await addVideoStream(video, stream);
     } catch (error) {
