@@ -1,15 +1,14 @@
-//connecting to our signaling server
-var conn = new WebSocket('ws://localhost:8080/group');
+const conn = new WebSocket('ws://localhost:8080/group');
 
-conn.onopen = function() {
+conn.onopen = async function() {
     console.log("Connected to the signaling server");
-    initialize();
-};
+    await initialize();
+}
 
-conn.onmessage = function(msg) {
+conn.onmessage = async function(msg) {
     console.log("Got message", msg.data);
-    var content = JSON.parse(msg.data);
-    var data = content.data;
+    let content = JSON.parse(msg.data);
+    let data = content.data;
     switch (content.event) {
         // when somebody wants to call us
         case "offer":
@@ -27,20 +26,25 @@ conn.onmessage = function(msg) {
     }
 };
 
-function send(message) {
-    conn.send(JSON.stringify(message));
+async function send(message) {
+    await conn.send(JSON.stringify(message));
 }
 
-const openMediaDevices = async (coons)
+let peerConnection;
+let dataChannel;
 
+async function initialize() {
+    let configuration = {
+        iceServers: [
+            {
+                urls: "turn:13.209.34.30",
+                username: "smilegate",
+                credential: "1q2w3e4r"
+            }
+        ]
+    }
 
-
-var peerConnection;
-var dataChannel;
-var input = document.getElementById("messageInput");
-
-function initialize() {
-    var configuration = null;
+    playVideoFromCamera(constraints);
 
     peerConnection = new RTCPeerConnection(configuration);
 
@@ -75,7 +79,6 @@ function initialize() {
     peerConnection.ondatachannel = function (event) {
         dataChannel = event.channel;
     };
-
 }
 
 function createOffer() {
@@ -115,7 +118,34 @@ function handleAnswer(answer) {
     console.log("connection established successfully!!");
 };
 
-function sendMessage() {
-    dataChannel.send(input.value);
-    input.value = "";
+
+let constraints = {
+    video: true,
+    audio: true
+};
+
+const videoGrid = document.getElementById('video-grid');
+
+// 카메라 마이크 설정
+const setMediaDevices = async (constraints) => {
+    return await navigator.mediaDevices.getUserMedia(constraints);
+}
+
+// 재생
+async function playVideoFromCamera(constraints) {
+    try {
+        const stream = await setMediaDevices(constraints);
+        const video = document.createElement('video');
+        await addVideoStream(video, stream);
+    } catch (error) {
+        console.log('Error opening video camera', error);
+    }
+}
+
+async function addVideoStream(video, stream) {
+    video.srcObject = stream
+    video.addEventListener('loadedmetadata', () => {
+        video.play();
+    })
+    videoGrid.append(video)
 }

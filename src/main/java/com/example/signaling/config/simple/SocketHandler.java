@@ -1,4 +1,4 @@
-package com.example.signaling.config.socket;
+package com.example.signaling.config.simple;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
