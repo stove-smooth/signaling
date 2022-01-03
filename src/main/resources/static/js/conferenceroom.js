@@ -15,12 +15,17 @@
  *
  */
 
-var ws = new WebSocket('ws://13.209.34.30:8080/group');
+var ws = new WebSocket('ws://localhost:8080/channels');
 var participants = {};
 var name;
 
 window.onbeforeunload = function() {
 	ws.close();
+};
+
+ws.onopen = function() {
+	console.log("Connected to the signaling server");
+	initialize();
 };
 
 ws.onmessage = function(message) {
@@ -53,6 +58,9 @@ ws.onmessage = function(message) {
 	}
 }
 
+var peerConnection;
+var dataChannel;
+
 function register() {
 	name = document.getElementById('name').value;
 	var room = document.getElementById('roomName').value;
@@ -67,6 +75,50 @@ function register() {
 		room : room,
 	}
 	sendMessage(message);
+}
+
+function initialize() {
+	var configuration = {
+		'iceServers': [{
+			urls: "turn:13.209.34.30",
+			username: "smilegate",
+			credential: "1q2w3e4r"
+		}]
+	};
+
+	peerConnection = new RTCPeerConnection(configuration);
+
+	// Setup ice handling
+	peerConnection.onicecandidate = function(event) {
+		if (event.candidate) {
+			send({
+				event : "candidate",
+				data : event.candidate
+			});
+		}
+	};
+
+	// creating data channel
+	dataChannel = peerConnection.createDataChannel("dataChannel", {
+		reliable : true
+	});
+
+	dataChannel.onerror = function(error) {
+		console.log("Error occured on datachannel:", error);
+	};
+
+	// when we receive a message from the other peer, printing it on the console
+	dataChannel.onmessage = function(event) {
+		console.log("message:", event.data);
+	};
+
+	dataChannel.onclose = function() {
+		console.log("data channel is closed");
+	};
+
+	peerConnection.ondatachannel = function (event) {
+		dataChannel = event.channel;
+	};
 }
 
 function onNewParticipant(request) {

@@ -1,4 +1,4 @@
-const conn = new WebSocket("ws://13.209.34.30:8080/group");
+const conn = new WebSocket("ws://localhost:8080/channels");
 
 conn.onopen = async function() {
     console.log("Connected to the signaling server");
@@ -34,17 +34,18 @@ let peerConnection;
 let dataChannel;
 
 async function initialize() {
-    let configuration = {
-        iceServers: [
-            {
+    let configuration = null;
+
+    /**
+     * iceServers: [
+     {
                 urls: "turn:13.209.34.30",
                 username: "smilegate",
                 credential: "1q2w3e4r"
             }
-        ]
-    }
-
-    playVideoFromCamera(constraints);
+     ]
+     */
+    await playVideoFromCamera(constraints);
 
     peerConnection = new RTCPeerConnection(configuration);
     console.log(peerConnection);
@@ -84,10 +85,18 @@ async function initialize() {
 }
 
 function createOffer() {
+    var name = document.getElementById('name').value;
+    var room = document.getElementById('roomName').value;
+
+    document.getElementById('room-header').innerText = 'ROOM ' + room;
+    document.getElementById('join').style.display = 'none';
+    document.getElementById('room').style.display = 'block';
+
     peerConnection.createOffer(function(offer) {
         send({
-            event : "offer",
-            data : offer
+            id : 'joinRoom',
+            name : name,
+            room : room,
         });
         peerConnection.setLocalDescription(offer);
     }, function(error) {
@@ -128,29 +137,24 @@ let constraints = {
 
 const videoGrid = document.getElementById('video-grid');
 
-// 카메라 마이크 설정
-const setMediaDevices = async (constraints) => {
-    return await navigator.mediaDevices.getUserMedia(constraints);
-}
-
 // 재생
 async function playVideoFromCamera() {
     try {
-        const stream = await setMediaDevices({
+        const video = document.createElement('video');
+        const stream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true
         });
-        const video = document.createElement('video');
-        await addVideoStream(video, stream);
+        addVideoStream(video, stream);
     } catch (error) {
         console.log('Error opening video camera', error);
     }
 }
 
-async function addVideoStream(video, stream) {
+function addVideoStream(video, stream) {
     video.srcObject = stream
     video.addEventListener('loadedmetadata', () => {
-        video.play();
+        video.play()
     })
     videoGrid.append(video)
 }

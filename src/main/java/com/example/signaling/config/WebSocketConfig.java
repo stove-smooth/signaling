@@ -1,7 +1,6 @@
-package com.example.signaling.config.group;
+package com.example.signaling.config;
 
 import org.kurento.client.KurentoClient;
-import org.kurento.client.Properties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -11,7 +10,9 @@ import org.springframework.web.socket.server.standard.ServletServerContainerFact
 
 @Configuration
 @EnableWebSocket
-public class GroupCallConfig implements WebSocketConfigurer {
+public class WebSocketConfig implements WebSocketConfigurer {
+
+    private static final int MAX_TEXT_MSG_BUFFER_SIZE = 32768;
 
     @Bean
     public UserRegistry registry() {
@@ -24,11 +25,6 @@ public class GroupCallConfig implements WebSocketConfigurer {
     }
 
     @Bean
-    public CallHandler groupCallHandler() {
-        return new CallHandler();
-    }
-
-    @Bean
     public KurentoClient kurentoClient() {
         return KurentoClient.create();
     }
@@ -36,12 +32,18 @@ public class GroupCallConfig implements WebSocketConfigurer {
     @Bean
     public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxTextMessageBufferSize(32768);
+        container.setMaxTextMessageBufferSize(MAX_TEXT_MSG_BUFFER_SIZE);
         return container;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(groupCallHandler(), "/group");
+        registry.addHandler(new ChannelHandler(), "/channels")
+                .setAllowedOrigins("*");;
     }
+
+    /**
+     * Todo
+     * jwt interceptor 적용
+     */
 }

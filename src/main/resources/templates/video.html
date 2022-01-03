@@ -17,6 +17,20 @@
   </style>
 </head>
 <body>
+<form onsubmit="createOffer(); return false;" accept-charset="UTF-8">
+    <p>
+        <input type="text" name="name" value="" id="name"
+               placeholder="Username" required>
+    </p>
+    <p>
+        <input type="text" name="room" value="" id="roomName"
+               placeholder="Room" required>
+    </p>
+    <p class="submit">
+        <input type="submit" name="commit" value="Join!">
+    </p>
+</form>
+<h2 id="room-header"></h2>
 <div id="video-grid"></div>
 </body>
 <script src="/static/js/group.js"></script>

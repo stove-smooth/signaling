@@ -1,4 +1,4 @@
-package com.example.signaling.config.group;
+package com.example.signaling.config;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

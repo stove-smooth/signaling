@@ -31,10 +31,6 @@ function send(message) {
     conn.send(JSON.stringify(message));
 }
 
-const openMediaDevices = async (coons)
-
-
-
 var peerConnection;
 var dataChannel;
 var input = document.getElementById("messageInput");
