@@ -23,43 +23,35 @@ window.onbeforeunload = function() {
 	ws.close();
 };
 
-ws.onopen = function() {
-	console.log("Connected to the signaling server");
-	initialize();
-};
-
 ws.onmessage = function(message) {
 	var parsedMessage = JSON.parse(message.data);
 	console.info('Received message: ' + message.data);
 
 	switch (parsedMessage.id) {
-	case 'existingParticipants':
-		onExistingParticipants(parsedMessage);
-		break;
-	case 'newParticipantArrived':
-		onNewParticipant(parsedMessage);
-		break;
-	case 'participantLeft':
-		onParticipantLeft(parsedMessage);
-		break;
-	case 'receiveVideoAnswer':
-		receiveVideoResponse(parsedMessage);
-		break;
-	case 'iceCandidate':
-		participants[parsedMessage.name].rtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
-	        if (error) {
-		      console.error("Error adding candidate: " + error);
-		      return;
-	        }
-	    });
-	    break;
-	default:
-		console.error('Unrecognized message', parsedMessage);
+		case 'existingParticipants':
+			onExistingParticipants(parsedMessage);
+			break;
+		case 'newParticipantArrived':
+			onNewParticipant(parsedMessage);
+			break;
+		case 'participantLeft':
+			onParticipantLeft(parsedMessage);
+			break;
+		case 'receiveVideoAnswer':
+			receiveVideoResponse(parsedMessage);
+			break;
+		case 'iceCandidate':
+			participants[parsedMessage.name].rtcPeer.addIceCandidate(parsedMessage.candidate, function (error) {
+				if (error) {
+					console.error("Error adding candidate: " + error);
+					return;
+				}
+			});
+			break;
+		default:
+			console.error('Unrecognized message', parsedMessage);
 	}
 }
-
-var peerConnection;
-var dataChannel;
 
 function register() {
 	name = document.getElementById('name').value;
@@ -75,50 +67,6 @@ function register() {
 		room : room,
 	}
 	sendMessage(message);
-}
-
-function initialize() {
-	var configuration = {
-		'iceServers': [{
-			urls: "turn:13.209.34.30",
-			username: "smilegate",
-			credential: "1q2w3e4r"
-		}]
-	};
-
-	peerConnection = new RTCPeerConnection(configuration);
-
-	// Setup ice handling
-	peerConnection.onicecandidate = function(event) {
-		if (event.candidate) {
-			send({
-				event : "candidate",
-				data : event.candidate
-			});
-		}
-	};
-
-	// creating data channel
-	dataChannel = peerConnection.createDataChannel("dataChannel", {
-		reliable : true
-	});
-
-	dataChannel.onerror = function(error) {
-		console.log("Error occured on datachannel:", error);
-	};
-
-	// when we receive a message from the other peer, printing it on the console
-	dataChannel.onmessage = function(event) {
-		console.log("message:", event.data);
-	};
-
-	dataChannel.onclose = function() {
-		console.log("data channel is closed");
-	};
-
-	peerConnection.ondatachannel = function (event) {
-		dataChannel = event.channel;
-	};
 }
 
 function onNewParticipant(request) {
@@ -159,17 +107,17 @@ function onExistingParticipants(msg) {
 	var video = participant.getVideoElement();
 
 	var options = {
-	      localVideo: video,
-	      mediaConstraints: constraints,
-	      onicecandidate: participant.onIceCandidate.bind(participant)
-	    }
+		localVideo: video,
+		mediaConstraints: constraints,
+		onicecandidate: participant.onIceCandidate.bind(participant)
+	}
 	participant.rtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerSendonly(options,
 		function (error) {
-		  if(error) {
-			  return console.error(error);
-		  }
-		  this.generateOffer (participant.offerToReceiveVideo.bind(participant));
-	});
+			if(error) {
+				return console.error(error);
+			}
+			this.generateOffer (participant.offerToReceiveVideo.bind(participant));
+		});
 
 	msg.data.forEach(receiveVideo);
 }
@@ -195,17 +143,17 @@ function receiveVideo(sender) {
 	var video = participant.getVideoElement();
 
 	var options = {
-      remoteVideo: video,
-      onicecandidate: participant.onIceCandidate.bind(participant)
-    }
+		remoteVideo: video,
+		onicecandidate: participant.onIceCandidate.bind(participant)
+	}
 
 	participant.rtcPeer = new kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options,
-			function (error) {
-			  if(error) {
-				  return console.error(error);
-			  }
-			  this.generateOffer (participant.offerToReceiveVideo.bind(participant));
-	});
+		function (error) {
+			if(error) {
+				return console.error(error);
+			}
+			this.generateOffer (participant.offerToReceiveVideo.bind(participant));
+		});;
 }
 
 function onParticipantLeft(request) {

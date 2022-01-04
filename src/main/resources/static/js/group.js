@@ -27,11 +27,28 @@ conn.onmessage = async function(msg) {
 };
 
 async function send(message) {
-    await conn.send(JSON.stringify(message));
+    const jsonMessage = JSON.stringify(message);
+    console.log('Sending message: ' + jsonMessage);
+    await conn.send(jsonMessage)
 }
 
 let peerConnection;
 let dataChannel;
+
+function register() {
+    let name = document.getElementById('name').value;
+    let room = document.getElementById('roomName').value;
+
+    document.getElementById('room-header').innerText = 'ROOM ' + room;
+    document.getElementById('join').style.display = 'none';
+    document.getElementById('room').style.display = 'block';
+
+    send({
+        id : 'joinRoom',
+        name : name,
+        room : room,
+    });
+}
 
 async function initialize() {
     let configuration = null;
@@ -48,7 +65,7 @@ async function initialize() {
     await playVideoFromCamera(constraints);
 
     peerConnection = new RTCPeerConnection(configuration);
-    console.log(peerConnection);
+
 
     // Setup ice handling
     peerConnection.onicecandidate = function(event) {

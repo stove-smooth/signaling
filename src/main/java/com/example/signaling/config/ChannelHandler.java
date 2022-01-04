@@ -3,6 +3,7 @@ package com.example.signaling.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.kurento.client.IceCandidate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,60 +17,63 @@ import java.io.IOException;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class ChannelHandler extends TextWebSocketHandler {
 
     private static final String ID = "id";
 
     private static final Gson gson = new GsonBuilder().create();
 
-    @Autowired
-    private RoomManager roomManager;
+    private final RoomManager roomManager;
 
-    @Autowired
-    private UserRegistry registry;
+    private final UserRegistry registry;
 
     /**
      * Todo 예외처리
      */
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    public void handleTextMessage(WebSocketSession session, TextMessage message)  {
+        try {
+            final JsonObject jsonMessage = gson.fromJson(message.getPayload(), JsonObject.class);
 
-        System.out.println(message);
+            final UserSession user = registry.getBySession(session);
 
-        final JsonObject jsonMessage = gson.fromJson(message.getPayload(), JsonObject.class);
+            System.out.println(user);
 
-        final UserSession user = registry.getBySession(session);
+            if (user != null) {
+                log.info("Incoming message from user '{}': {}", user.getName(), jsonMessage);
+            } else {
+                log.info("Incoming message from new user: {}", jsonMessage);
+            }
 
-        if (user != null) {
-            log.info("Incoming message from user '{}': {}", user.getName(), jsonMessage);
-        } else {
-            log.info("Incoming message from new user: {}", jsonMessage);
-        }
+            switch (jsonMessage.get(ID).getAsString()) {
+                case "joinRoom":
+                    log.info("ID : {}", "joinRoom");
+                    joinRoom(jsonMessage, session);
+                    break;
+                case "receiveVideoFrom":
+                    final String senderName = jsonMessage.get("sender").getAsString();
+                    final UserSession sender = registry.getByName(senderName);
+                    final String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
+                    user.receiveVideoFrom(sender, sdpOffer);
+                    break;
+                case "leaveRoom":
+                    leaveRoom(user);
+                    break;
+                case "onIceCandidate":
+                    JsonObject candidate = jsonMessage.get("candidate").getAsJsonObject();
 
-        switch (jsonMessage.get(ID).getAsString()) {
-            case "joinRoom":
-                joinRoom(jsonMessage, session);
-                break;
-            case "receiveVideoFrom":
-                final String senderName = jsonMessage.get("sender").getAsString();
-                final UserSession sender = registry.getByName(senderName);
-                final String sdpOffer = jsonMessage.get("sdpOffer").getAsString();
-                user.receiveVideoFrom(sender, sdpOffer);
-                break;
-            case "leaveRoom":
-                leaveRoom(user);
-                break;
-            case "onIceCandidate":
-                JsonObject candidate = jsonMessage.get("candidate").getAsJsonObject();
-
-                if (user != null) {
-                    IceCandidate cand = new IceCandidate(candidate.get("candidate").getAsString(),
-                            candidate.get("sdpMid").getAsString(), candidate.get("sdpMLineIndex").getAsInt());
-                    user.addCandidate(cand, jsonMessage.get("name").getAsString());
-                }
-                break;
-            default:
-                break;
+                    if (user != null) {
+                        IceCandidate cand = new IceCandidate(candidate.get("candidate").getAsString(),
+                                candidate.get("sdpMid").getAsString(), candidate.get("sdpMLineIndex").getAsInt());
+                        user.addCandidate(cand, jsonMessage.get("name").getAsString());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
