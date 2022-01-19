@@ -7,29 +7,30 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
-
-import java.util.concurrent.TimeUnit;
+import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 @Configuration
-@EnableWebSocket
 @RequiredArgsConstructor
+@EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final ChannelHandler channelHandler;
 
-    private static final int MAX_TEXT_MSG_BUFFER_SIZE = 32768;
+    private static final int MESSAGE_BUFFER_SIZE = 8192;
 
     @Bean
     public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxTextMessageBufferSize(MAX_TEXT_MSG_BUFFER_SIZE);
-        container.setMaxSessionIdleTimeout(TimeUnit.MINUTES.toMillis(10));
+        container.setMaxTextMessageBufferSize(MESSAGE_BUFFER_SIZE);
+        container.setMaxBinaryMessageBufferSize(MESSAGE_BUFFER_SIZE);
+
         return container;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(channelHandler, "/channels")
-                .setAllowedOrigins("*");;
+                .addInterceptors(new HttpSessionHandshakeInterceptor())
+                .setAllowedOrigins("*");
     }
 }
