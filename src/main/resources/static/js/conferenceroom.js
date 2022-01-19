@@ -15,7 +15,9 @@
  *
  */
 
-var ws = new WebSocket('ws://localhost:8080/channels');
+// ws://localhost:8080/channels
+// wss://sig.yoloyolo.org/channels
+var ws = new WebSocket('wss://sig.yoloyolo.org/channels');
 var participants = {};
 var name;
 
