@@ -11,9 +11,5 @@ public class WebController {
         return "home";
     }
 
-    @GetMapping("/video")
-    public String video() { return "video"; }
 
-    @GetMapping("/video2")
-    public String video2() { return "video2"; }
 }
