@@ -17,7 +17,13 @@
 
 // ws://localhost:8080/channels
 // wss://sig.yoloyolo.org/channels
-var ws = new WebSocket('ws://localhost:8080/channels');
+// var ws = new WebSocket('ws://localhost:8080/channels');
+var ws = new SockJS('http://localhost:8080/channels', null, {
+	transports: ["websocket", "xhr-streaming", "xhr-polling"]
+});
+
+ws.onopen = function () { console.log("connected"); }
+
 var participants = {};
 var name;
 
