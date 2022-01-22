@@ -4,5 +4,3 @@ server:
 spring:
   mvc:
     static-path-pattern: /static/**
-#  main:
-#    allow-bean-definition-overriding: true

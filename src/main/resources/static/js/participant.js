@@ -46,6 +46,8 @@ function Participant(name) {
 	video.autoplay = true;
 	video.controls = false;
 
+	var sdp;
+
 
 	this.getElement = function() {
 		return container;
@@ -102,3 +104,4 @@ function Participant(name) {
 		container.parentNode.removeChild(container);
 	};
 }
+
