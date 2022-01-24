@@ -1,14 +1,15 @@
 const iceServers = [
     {
-        "urls": "stun:stun.l.google.com:19302"
+        "urls": [
+            "stun:stun.l.google.com:19302",
+            "stun:stun1.l.google.com:19302",
+            "stun:stun2.l.google.com:19302",
+            "stun:stun3.l.google.com:19302",
+            "stun:stun4.l.google.com:19302"
+        ]
     },
     {
-        "urls":"turn:sig.yoloyolo.org?transport=udp",
-        "username": "heedong",
-        "credential":"1q2w3e4r!"
-    },
-    {
-        "urls":"turn:sig.yoloyolo.org?transport=tcp",
+        "urls":"turn:sig.yoloyolo.org",
         "username": "heedong",
         "credential":"1q2w3e4r!"
     }
