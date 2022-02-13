@@ -28,3 +28,4 @@
 - [미디어 서버 선택하기](https://github.com/stove-smooth/sgs-smooth/wiki/%EB%AF%B8%EB%94%94%EC%96%B4-%EC%84%9C%EB%B2%84-%EC%84%A0%ED%83%9D%ED%95%98%EA%B8%B0)
 - [Kurento 설치 및 설정](https://github.com/stove-smooth/sgs-smooth/tree/develop/docs/reference/kurento)
 - Chrome에서 WebRTC 스트림 값 확인 : chrome://webrtc-internals/
+- [remote stream 오디오 레벨 확인](https://github.com/stove-smooth/signaling/wiki/Remote-stream-%EC%98%A4%EB%94%94%EC%98%A4-%EC%82%AC%EC%9D%B4%EC%A6%88-%ED%99%95%EC%9D%B8)
